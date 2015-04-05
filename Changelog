@@ -8,6 +8,7 @@ NOTE: From now on, new changes appear at the top of this file.
             Removing unnecessary spaces
             Removing many blank lines (line wasting)
             Expanding some ifs and switch cases
+
         - Bruno Victal provided further code clean-up
             Renamed old referenced files in the perror calls (from .cc to .cpp)
             Removed some useless casts in printf calls [ printf((char *)"String here"); ]
@@ -24,7 +25,13 @@ NOTE: From now on, new changes appear at the top of this file.
 	- fixes const-correctness for all the menu structure
 	- moves stack-allocated read-only arrays to .rodata so no large stack
 	memory is used.
-	- adds myself to the list of people (feel free to remove me if this
+	- adds Daniel to the list of people (feel free to remove me if this
+
+	Bruno Victal provided two more fixes.
+	- Fix isnan() ambiguity when compiled with C++11 standards
+	- Removed OLD_GAMELOOP code and references. Stick with
+	modern game loop.
+
 
 =========== Atanks-6.1 released ==============
 	All of this releases patches were provided by Bill Buerger.
