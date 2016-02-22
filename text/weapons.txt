@@ -170,35 +170,35 @@ Produce a huge earthquake on impact
 
 Riot Bomb
 Destroy a small volume of dirt without damaging anything else
-2000 5 15 0.2 25 0 2 0 23 1 0 0 1 0 0 -1 0 0 0 0 0 -1 0
+2000 5 15 0.2 50 0 2 0 23 1 0 0 1 0 0 -1 0 0 0 0 0 -1 0
 
 Heavy Riot Bomb
 Destroy a large volume of dirt without damaging anything else
-3000 2 30 0.2 100 1 2 0 24 1 0 0 3 0 0 -1 0 0 0 0 0 -1 0
+3000 2 30 0.2 125 1 2 0 24 1 0 0 3 0 0 -1 0 0 0 0 0 -1 0
 
 Riot Charge
 Cuts through a cone of dirt directly in front of the gun
-1000 5 15 0.2 50 0 2 0 11 1 0 1 1 0 0 -1 0 0 0 0 0 0 0
+1000 5 15 0.2 75 0 2 0 11 1 0 1 1 0 0 -1 0 0 0 0 0 0 0
 
 Riot Blast
 Cuts through a large cone of dirt directly in front of the gun
-2000 2 30 0.2 150 1 2 0 12 1 0 1 3 0 0 -1 0 0 0 0 0 0 0
+2000 2 30 0.2 200 1 2 0 12 1 0 1 3 0 0 -1 0 0 0 0 0 0 0
 
 Dirt Ball
 Produce a small sphere of material to bury your opponents
-3000 5 15 0.2 25 0 2 0 11 1 0 0 1 0 0 -1 0 0 0 0 0 -1 0
+3000 5 15 0.2 40 0 2 0 11 1 0 0 1 0 0 -1 0 0 0 0 0 -1 0
 
 Large Dirt Ball
 Produce a large sphere of material to bury your opponents
-7000 2 30 0.2 60 1 2 0 12 1 0 0 3 0 0 -1 0 0 0 0 0 -1 0
+7000 2 30 0.2 70 1 2 0 12 1 0 0 3 0 0 -1 0 0 0 0 0 -1 0
 
 Super Dirt Ball
 Produce a huge ball of material to bury your opponents
-10000 1 60 0.2 100 2 2 0 13 1 0 0 4 0 0 -1 0 0 0 0 0 -1 0
+10000 1 60 0.2 120 2 2 0 13 1 0 0 4 0 0 -1 0 0 0 0 0 -1 0
 
 Small Dirt Spread
 Drop little piles of dirt on your enemies
-4000 2 30 0.2 40 1 2 0 12 4 0 0 3 0 0 -1 0 0 0 0 0 -1 0
+4000 2 30 0.2 70 1 2 0 12 4 0 0 3 0 0 -1 0 0 0 0 0 -1 0
 
 Cluster MIRV
 Releases a cluster of small missiles on its way down
