@@ -268,15 +268,15 @@ Change the wind strength and direction
 
 Vengeance
 A small self-destruct or auto-destruct device, if you've got to go, why not take someone with you?
-10000 1 1 2 2 1 21
+2500 1 1 2 2 1 21
 
 Dying Wrath
 A large self/auto-destruct device. Mutually Assured Destruction.
-25000 1 1 3 3 21 3
+6000 1 1 3 3 21 3
 
 Fatal Fury
 End it all in style
-50000 1 1 4 4 24 5
+10000 1 1 4 4 24 5
 
 Light Shield
 A small amount of protection from damage
@@ -336,13 +336,13 @@ Repairs the tank a little each turn. Each additional kit provides a slightly sma
 
 Fuel
 Allows the tank to move across level terran.
-1000 10 0 2 0 0 0
+200 10 0 2 0 0 0
 
 Rocket
 Launches the tank into the air.
-2000 2 1 4 0 0 0
+1000 2 1 4 0 0 0
 
 SDI Missile Defense
 Offers some protection against incoming missiles. Additional purchases increase the range of defense. There is a 1% chance on each use that an item will burn out.
-10000 1 0 5 5 0
+30000 1 0 5 5 0
 
