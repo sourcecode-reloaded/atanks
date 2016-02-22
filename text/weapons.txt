@@ -1,3 +1,8 @@
+# Cost Amount Mass Drag Radius Sound Etime Damage Picpoint Spread Delay Noimpact
+# TechLevel Warhead NumSubmunitions Submunition ImpartVelocity Divergence
+# SpreadVariation LaunchSpeed SpeedVariation CountDown CountVariation
+#
+
 *WEAPONS*
 Small Missile
 Produces a low impact explosion
@@ -204,7 +209,7 @@ Destroys half of the target's armour
 12000 2 30 0.2 30 3 4 0 29 1 0 0 3 0 0 -1 0 0 0 0 0 -1 0
 
 Reducer
-Lowers the explosive power of an enemy's missiles.
+Lowers the explosive power of an enemy's missiles by one third.
 6000 3 25 0.3 30 3 4 0 30 1 0 0 4 0 0 -1 0 0 0 0 0 -1 0
 
 Small Laser
