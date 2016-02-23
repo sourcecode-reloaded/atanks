@@ -1360,7 +1360,10 @@ bool TANK::isInEllipse(double ex, double ey, double rx, double ry,
 bool TANK::moveTank(int32_t direction)
 {
 	// Return false now if there is no fuel or the tank is currently flying
-	if ( (player->ni[ITEM_FUEL] < 1 ) || (yv < 0.) || (yv > 0.) )
+	// or covered in dirt.
+	if ( (player->ni[ITEM_FUEL] < 1 )                   // No fuel ?
+	  || (yv < 0.) || (yv > 0.)                         // flying / falling ?
+	  || (PINK != getpixel(global.terrain, x, y - 1)) ) // Dirty on top ?
 		return false;
 
 	// Safety: assert DIR_LEFT/RIGHT
@@ -1371,35 +1374,33 @@ bool TANK::moveTank(int32_t direction)
 
 	// Check whether the target pixel is beyond the border or occupied
 	int32_t next_x = x + direction;
-	int32_t min_y  = y + tank_off_y - tank_sag - 4 ;
 
 	if ( (next_x < 1)
 	  || (next_x >= env.screenWidth)
 	  || (env.landType == LAND_NONE) )
 		return false;
 
-	if (PINK != getpixel(global.terrain, next_x, min_y))
-		return false;
 
-	// move tank
-	x += direction;
-	player->ni[ITEM_FUEL]--;
+	// select the next pixel on the left/right that is not terrain
+	float surfY = global.surface[ROUND(x + direction)].load(ATOMIC_READ) - 1;
 
-	// Allow the tank to move up a bit if necessary
-	y = min_y + 5;
-	if (y > env.screenHeight - 1)
-		y = env.screenHeight - 1;
+	// If the tank is not climbing too much, let it move:
+	if (surfY > (y - tank_off_y + tank_sag)) {
+		// move tank
+		x += direction;
+		player->ni[ITEM_FUEL]--;
 
-	while ( ( y > min_y ) && (PINK != getpixel(global.terrain, x, y)))
-		--y;
-	// Now fix y back to normal coordinate
-	y -= tank_off_y - tank_sag;
+		// climb and correct for the tank extension
+		y = surfY - tank_off_y + tank_sag;
 
-	// But secure y
-	if (y > (env.screenHeight - tank_off_y))
-		y = env.screenHeight - tank_off_y;
+		// But secure y
+		if (y > (env.screenHeight - tank_off_y))
+			y = env.screenHeight - tank_off_y;
+		return true;
+	}
 
-	return true;
+	// No move:
+	return false;
 }
 
 
