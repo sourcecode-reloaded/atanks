@@ -587,7 +587,8 @@ void EXPLOSION::explode ()
 					else if (REDUCER == weapType) {
 						// Note: dmg was set to a fake damage of 1.0
 						lt->player->damageMultiplier *= 0.667; // already checked
-					} else if (THEFT_BOMB == weapType) {
+					} else if ( (THEFT_BOMB == weapType)
+					         && (lt->player != player) ) {
 						// Note: dmg was set to a fake damage of 1.0
 						int32_t max_amount = ROUND(player->damageMultiplier * 5000);
 						int32_t amount     = lt->player->money <= max_amount
@@ -606,7 +607,7 @@ void EXPLOSION::explode ()
 								              .0, -.5, RED,
 								              CENTRE,
 								              env.swayingText ? TS_HORIZONTAL : TS_NO_SWAY,
-								              200);
+								              200, false);
 								if (global.stage < STAGE_SCOREBOARD)
 									global.updateMenu = true;
 							} catch (...) {
@@ -617,9 +618,9 @@ void EXPLOSION::explode ()
 
 						lt->player->money -= amount; // the actual theft.
 						player->money     += amount; // money goes to the shooter.
-					} else
+					} else if (THEFT_BOMB != weapType)
 						lt->addDamage(player, dmg
-									* (player ? player->damageMultiplier : 1.) );
+						            * (player ? player->damageMultiplier : 1.) );
 				} // End of having damage to deal
 
 				lt->getNext(&lt);
