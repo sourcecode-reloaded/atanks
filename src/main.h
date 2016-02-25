@@ -496,10 +496,10 @@ enum weaponType
 	CLUSTER_MIRV       = 49,
 	PERCENT_BOMB       = 50,
 	REDUCER            = 51,
-	THEFT_BOMB         = 52, // Last ballistic
+	THEFT_BOMB         = 52, // Last ballistic (WEAPONS == 53)
 	SML_LAZER          = 53,
 	MED_LAZER          = 54,
-	LRG_LAZER          = 55, // Last weapon (WEAPONS == 55)
+	LRG_LAZER          = 55, // Last weapon (WEAPONS == 56)
 	SML_METEOR         = 56,
 	MED_METEOR         = 57,
 	LRG_METEOR         = 58,

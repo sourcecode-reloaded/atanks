@@ -47,6 +47,13 @@ bool Save_Game()
 	if (!game_file)
 		return false;
 
+	// write file version information
+	double this_version = 0.;
+	sscanf(VERSION, "%lf", &this_version);
+	fprintf(game_file, "VERSION\n");
+	fprintf(game_file, "FILE_VERSION=%d\n", (int)(this_version * 10));
+	fprintf(game_file, "***\n");
+
 	// write global data
 	fprintf(game_file, "GLOBAL\n");
 	fprintf(game_file, "CURRENTROUND=%d\n", global.currentround + 1);
@@ -119,6 +126,7 @@ bool Load_Game()
 	int32_t line_num                   = 0;
 	int32_t player_idx                 = -1;
 	bool    done                       = false;
+	int32_t file_version               = 0;
 
 	// Be sure that numbers are understood right:
 	const char* cur_lc_numeric = setlocale(LC_NUMERIC, "C");
@@ -161,6 +169,8 @@ bool Load_Game()
 				stage = SGS_ENVIRONMENT;
 			else if (!strcasecmp(line, "PLAYERS") )
 				stage = SGS_PLAYERS;
+			else if (!strcasecmp(line, "VERSION") )
+				stage = SGS_VERSION;
 			else {
 				// Not a new stage, keep loading.
 
@@ -238,7 +248,7 @@ bool Load_Game()
 
 						// Now let the player load itself
 						if (player_idx > -1)
-							env.allPlayers[player_idx]->load_game_data(game_file);
+							env.allPlayers[player_idx]->load_game_data(game_file, file_version);
 						else {
 							cerr << path_buf << ":" << line_num << " : Ignored line\n";
 							cerr << "The line \"" << line << "\"";
@@ -246,6 +256,14 @@ bool Load_Game()
 						}
 
 						break;
+					case SGS_VERSION:
+						if (!strcasecmp(field, "FILE_VERSION") )
+							sscanf(value, "%d", &file_version);
+						else {
+							cerr << path_buf << ":" << line_num << " : Ignored line\n";
+							cerr << "The line \"" << line << "\"";
+							cerr << " is ignored, it does not belong to VERSION" << endl;
+						}
 					case SGS_NONE:
 					default:
 						cerr << path_buf << ":" << line_num << " : Wrong line\n";
