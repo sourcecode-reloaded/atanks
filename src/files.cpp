@@ -48,10 +48,8 @@ bool Save_Game()
 		return false;
 
 	// write file version information
-	double this_version = 0.;
-	sscanf(VERSION, "%lf", &this_version);
 	fprintf(game_file, "VERSION\n");
-	fprintf(game_file, "FILE_VERSION=%d\n", (int)(this_version * 10));
+	fprintf(game_file, "FILE_VERSION=%d\n", game_version);
 	fprintf(game_file, "***\n");
 
 	// write global data
@@ -167,9 +165,18 @@ bool Load_Game()
 				stage = SGS_GLOBAL;
 			else if (!strcasecmp(line, "ENVIRONMENT") )
 				stage = SGS_ENVIRONMENT;
-			else if (!strcasecmp(line, "PLAYERS") )
+			else if (!strcasecmp(line, "PLAYERS") ) {
+				// Here the file version must be known, or it is not set.
+				// Inform the user if an upgrade is needed
+				if (game_version > file_version)
+					fprintf(stdout, "Game \"%s\" needs to be upgraded"
+					        " from version %2.1f to version %2.1f\n",
+					        env.game_name,
+					        static_cast<float>(file_version) / 10.0,
+					        static_cast<float>(game_version) / 10.0);
+
 				stage = SGS_PLAYERS;
-			else if (!strcasecmp(line, "VERSION") )
+			} else if (!strcasecmp(line, "VERSION") )
 				stage = SGS_VERSION;
 			else {
 				// Not a new stage, keep loading.
