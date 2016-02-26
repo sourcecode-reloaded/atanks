@@ -245,6 +245,10 @@ using std::string;
 #define MAX_ITEMS_IN_STOCK 999999
 #define MAX_MONEY_IN_WALLET 1000000000
 
+// to make the theft bomb base steal easier to change, here
+// is a useful define. Maybe, one day, we'll add it to the options?
+#define THEFT_AMOUNT 5000
+
 // Use these instead of the (most strict) defaults,
 // But only where timing by memory fences do not matter.
 #define ATOMIC_READ  std::memory_order_acquire

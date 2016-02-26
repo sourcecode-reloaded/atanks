@@ -4456,8 +4456,9 @@ void AICore::updateWeapScore(weEntry_t* pWeap)
 	}
 
 
-	// === If this is the percent bomb, its damage must be adapted, ===
-	// === as it depends on the selected target.                    ===
+	// === If this is the percent bomb, reducer or theft bomb, its  ===
+	// === damage must be adapted, as it depends on the selected    ===
+	// === target and/or current capabilities.                      ===
 	// ================================================================
 	if (PERCENT_BOMB == wType) {
 		pWeap->dmgCluster = 0.;
@@ -4472,6 +4473,15 @@ void AICore::updateWeapScore(weEntry_t* pWeap)
 		                  * (mem_curr->entry->opponent->damageMultiplier / 2.)
 		                  * (player->painSensitivity + ai_over_mod)
 		                  / (-1. * (player->defensive - 1.25 - ai_over_mod));
+		pWeap->dmgSpread  = pWeap->dmgSingle;
+	}
+
+	// === And the theft bomb ===
+	int32_t theft_size = static_cast<int32_t>(player->damageMultiplier * THEFT_AMOUNT);
+	if (THEFT_BOMB == wType) {
+		double steal_amount = std::min(mem_curr->entry->opponent->money, theft_size);
+		pWeap->dmgCluster = 0.;
+		pWeap->dmgSingle  = ROUND(steal_amount / ai_level_d);
 		pWeap->dmgSpread  = pWeap->dmgSingle;
 	}
 
@@ -4492,14 +4502,17 @@ void AICore::updateWeapScore(weEntry_t* pWeap)
 		dmg_diff = (weap_dmg / ai_over_mod) - point_score;
 		if (dmg_diff > 0.)
 			dmg_diff *= shock_bonus;
-	} else if (pWeap->dmgSpread > pWeap->dmgSingle) {
+	} else if (pWeap->dmgSpread > (pWeap->dmgSingle + 0.25) ) {
 		weap_dmg = pWeap->dmgSpread;
 		dmg_diff = (weap_dmg / (ai_over_mod / 2.)) - point_score;
 		if (dmg_diff > 0.)
 			dmg_diff *= shock_bonus;
 	} else if (pWeap->dmgSingle > 1.) {
 		weap_dmg = pWeap->dmgSingle;
-		dmg_diff = weap_dmg / ai_over_mod - point_score;
+		dmg_diff = weap_dmg / ai_over_mod
+		         - (THEFT_BOMB == wType
+		             ? mem_curr->entry->opponent->money
+		             : point_score);
 	} else
 		dmg_diff = -point_score;
 
@@ -4512,10 +4525,11 @@ void AICore::updateWeapScore(weEntry_t* pWeap)
 		             / ( -(player->defensive - 2.5) // 3.5 full offensive, 2.5 full defensive
 		               * ai_over_mod ); // the higher the level, the more the reduction.
 
-	// If this is a REDUCER or dirt weapon, and the fake damage is
+	// If this is a REDUCER, THEFT_BOMB or dirt weapon, and the fake damage is
 	// higher than the target health, modify the score. The AI wants
 	// to finish off the almost dead and not debuff them
 	if ( (REDUCER == wType)
+	  || (THEFT_BOMB == wType)
 	  || ( (DIRT_BALL <= wType) && (SMALL_DIRT_SPREAD >= wType) ) ) {
 		if (mem_curr->opLife <= blast_min)
 			point_score = 0;
@@ -4526,6 +4540,11 @@ void AICore::updateWeapScore(weEntry_t* pWeap)
 		else if (dmg_diff > 0.)
 			point_score /= ai_over_mod;
 	}
+
+	// If this is the theft bomb, but we do not need money urgently,
+	// reduce the score
+	if ( (REDUCER == wType) && !needMoney)
+		point_score /= ai_level_d + ai_over_mod;
 
 
 	/* -------------------------------------------------------------
@@ -4724,24 +4743,33 @@ void AICore::updateWeapScore(weEntry_t* pWeap)
 				              std::abs(ROUND(score)))
 
 				// Note down money made or cost:
-				if (op->team_mod > 0.)
-					money_made += ( std::min(weap_dmg * in_rate, op->opLife)
-					              * static_cast<double>(env.scoreHitUnit) )
-					            + ( (weap_dmg * in_rate) >= op->opLife
-					                ? static_cast<double>(env.scoreUnitDestroyBonus)
-					                : 0.);
-				else if (lt == tank)
-					money_cost += ( std::min(weap_dmg * in_rate, currLife)
-					              * static_cast<double>(env.scoreSelfHit) )
-					            + ( (weap_dmg * in_rate) >= currLife
-					                ? static_cast<double>(env.scoreUnitSelfDestroy)
-					                : 0.);
-				else
-					money_cost += ( std::min(weap_dmg * in_rate, op->opLife)
-					              * static_cast<double>(env.scoreTeamHit) )
-					            + ( (weap_dmg * in_rate) >= op->opLife
-					                ? static_cast<double>(env.scoreUnitSelfDestroy)
-					                : 0.);
+				if (THEFT_BOMB == wType) {
+						double theft_done = std::min(in_rate * theft_size,
+						       static_cast<double>(op->entry->opponent->money));
+					if (op->team_mod > 0.)
+						money_made += theft_done;
+					else if (lt != tank) // No effect on self!
+						money_cost += theft_done / (10. - ai_level_d);
+				} else {
+					if (op->team_mod > 0.)
+						money_made += ( std::min(weap_dmg * in_rate, op->opLife)
+						              * static_cast<double>(env.scoreHitUnit) )
+						            + ( (weap_dmg * in_rate) >= op->opLife
+						                ? static_cast<double>(env.scoreUnitDestroyBonus)
+						                : 0.);
+					else if (lt == tank)
+						money_cost += ( std::min(weap_dmg * in_rate, currLife)
+						              * static_cast<double>(env.scoreSelfHit) )
+						            + ( (weap_dmg * in_rate) >= currLife
+						                ? static_cast<double>(env.scoreUnitSelfDestroy)
+						                : 0.);
+					else
+						money_cost += ( std::min(weap_dmg * in_rate, op->opLife)
+						              * static_cast<double>(env.scoreTeamHit) )
+						            + ( (weap_dmg * in_rate) >= op->opLife
+						                ? static_cast<double>(env.scoreUnitSelfDestroy)
+						                : 0.);
+				} // End of regular weapon check
 			} // End of opponent in explosion
 
 			op = op->next;

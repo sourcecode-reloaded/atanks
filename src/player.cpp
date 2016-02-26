@@ -1391,7 +1391,8 @@ void PLAYER::generatePreferences()
 				// Note: The theft bomb is a debuff weapon with extra benefits. ;-)
 				if (THEFT_BOMB == currItem)
 					worth = (150. + vengeful) * ai_rate
-					      * ( (selfPreservation + 2.) / 2.);
+					      * ( (selfPreservation + 2.) / 2.)
+					      * (std::abs(defensive) + 1.0);
 
 				// === 5. Shaped weapons are deadly but limited ===
 				//--------------------------------------------------
@@ -2235,11 +2236,16 @@ void PLAYER::load_game_data(FILE* file, int32_t file_version)
 					/* === Version Checks for new weapons / items === */
 
 					if ( (file_version < 65) && (prf_idx >= THEFT_BOMB) ) {
-						if (THEFT_BOMB == prf_idx)
+						if (THEFT_BOMB == prf_idx) {
 							// Generate a value
 							weapPref[THEFT_BOMB] = (150. + vengeful)
 							                     * (static_cast<double>(type) / 2. + .5)
-						                         * ( (selfPreservation + 2.) / 2.);
+						                         * ( (selfPreservation + 2.) / 2.)
+						                         * (std::abs(defensive) + 1.0);
+							DEBUG_LOG_EMO(name, "New preference for %s : %5d",
+							              weapon[THEFT_BOMB].getName(),
+							              weapPref[THEFT_BOMB])
+						}
 						++prf_idx; // Skip new index value
 					} // End of version 65 THEFT_BOMB
 
