@@ -4543,7 +4543,7 @@ void AICore::updateWeapScore(weEntry_t* pWeap)
 
 	// If this is the theft bomb, but we do not need money urgently,
 	// reduce the score
-	if ( (REDUCER == wType) && !needMoney)
+	if ( (THEFT_BOMB == wType) && !needMoney)
 		point_score /= ai_level_d + ai_over_mod;
 
 
@@ -4620,6 +4620,8 @@ void AICore::updateWeapScore(weEntry_t* pWeap)
 			panic_score += weapon[wType].radius
 			             * weapon[wType].spread
 			             * (1.5 + player->defensive);
+		else if (THEFT_BOMB == wType)
+			panic_score += pWeap->dmgSingle * player->selfPreservation;
 	}
 
 
@@ -4864,7 +4866,13 @@ void AICore::updateWeapScore(weEntry_t* pWeap)
 			if ( (selfde_score > 0.) && tgt_in_range)
 				pWeap->kamikaze = true;
 
-		} else
+		} else if (THEFT_BOMB == pWeap->type)
+			// In such a situation a (non-aggravating!) theft might
+			// be considered useful the more defensive and self preservative
+			// a bot is.
+			selfde_score = pWeap->dmgSingle * ai_type_mod
+			             * (2. + player->defensive + player->selfPreservation);
+		else
 			// Unsuitable
 			selfde_score -= pWeap->dmgSpread * ai_type_mod;
 	  }
