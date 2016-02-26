@@ -271,6 +271,8 @@ bool Load_Game()
 							cerr << "The line \"" << line << "\"";
 							cerr << " is ignored, it does not belong to VERSION" << endl;
 						}
+
+						break;
 					case SGS_NONE:
 					default:
 						cerr << path_buf << ":" << line_num << " : Wrong line\n";
