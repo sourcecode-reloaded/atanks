@@ -2836,6 +2836,29 @@ bool AICore::hasExited() const
 }
 
 
+/** @brief Signal the AI that the tank was moved
+  *
+  * The direction signals the following:
+  *
+  * < 0 : Moved to the left
+  * = 0 : Movement not possible
+  * > 0 : Moved to the right.
+  *
+  * @param[in] direction indicate movement direction
+**/
+void AICore::hasMoved(int32_t direction)
+{
+	if (direction) {
+		isMovedBy = direction;
+		canMove   = true;
+	} else {
+		isMovedBy = 0;
+		canMove   = false;
+	}
+
+}
+
+
 /// @brief initialize work with the current players data
 bool AICore::initialize()
 {
@@ -2857,6 +2880,8 @@ bool AICore::initialize()
 	blast_med     = 0.;
 	blast_big     = 0.;
 	blast_max     = 0.;
+	canMove       = true;
+	isMovedBy     = 0;
 	isShocked     = false;
 	revengee      = nullptr;
 	shocker       = nullptr;

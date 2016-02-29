@@ -89,6 +89,8 @@ struct sWeapListEntry;
   * ai_type_mod   : (from level)   Multiplier [1.0;3.0] according to ai_level_d, used on important decisions to
   *                                strengthen higher bot levels.
   * blast_*       : (0)            Damage values of the available normal missiles.
+  * canMove       : (true)         As long as it is true, allows the AI to consider using fuel/rockets.
+  * isMovedBy     : (0)            Set from the outside via hasMoved() to indicate the result of movement attempts.
   * isShocked     : (false)        Whether the bot is shocked by anothers massive damage they dealt.
   * revengee      : (nullptr)      sOpponent pointer set to a bot this one wants revenge against.
   * shocker       : (nullptr)      sOpponent pointer set to the bot that caused isShocked to become true.
@@ -693,7 +695,18 @@ struct sWeapListEntry;
   *            curr_angle       = best_angle;
   *            curr_power       = best_power;
   *
-  *     4.12 Return true if either best_round_score is larger than zero, or both is_last and needSuccess are true.
+  *     4.12 Otherwise, if it does not seem to be possible to find a valid setup within half of the attempts the AI has,
+  *          try to move the tank a little according to the following rules:
+  *
+  *          - If the target is very near (under two bitmap widths) then move away.
+  *          Otherwise:
+  *          - If the angle is steep (75° and up), assume the shot must go over a hill and move away from the target.
+  *          - If the angle is flat  (15° and down), move towards the target, the way seems clear at least.
+  *          Otherwise:
+  *          - If the overshoot is negative (too short), move away from target.
+  *          - If the overshoot is positive (too far), move towards the target.
+  *
+  *     4.13 Return true if either best_round_score is larger than zero, or both is_last and needSuccess are true.
   *
   *   5  If the aiming was successful, a few more checks are made.
   *
@@ -768,6 +781,7 @@ public:
 	bool    can_work     () const;
 	void    forbidText   ();
 	bool    hasExited    () const;
+	void    hasMoved     (int32_t direction);
 	bool    start        (PLAYER* player_);
 	bool    status       (int32_t &aItem, int32_t &aAngle,
 	                      int32_t &aPower, ePlayerStages &pl_stage);
@@ -855,6 +869,7 @@ private:
 	// Internal values
 	mutex_t    actionMutex;
 	condv_t    actionCondition;
+	bool       canMove          = true;
 	volatile
 	bool       canWork          = true;
 	int32_t    curr_angle       = 90;    //!< The angle that is currently tested
@@ -870,6 +885,7 @@ private:
 	bool       isBlocked        = false; //!< Set to true if a shot can't get through
 	volatile
 	bool       isFinished       = false; //!< Set to true when operator() ends
+	int32_t    isMovedBy        = 0;
 	bool       isShocked        = false;
 	volatile
 	bool       isStopped        = false;
