@@ -264,9 +264,11 @@ PLAYER* AICore::active_player() const
 /** @brief aim the current selection
   * @param[in] is_last if set to true, the best result is accepted, no matter
   * what the outcome might be.
+  * @param[in] can_move if set to true, the AI might try to move the tank into
+  * a better position.
   * @return true if the aiming resulted in a usable hit.
 **/
-bool AICore::aim(bool is_last)
+bool AICore::aim(bool is_last, bool can_move)
 {
 	plStage = PS_AIM;
 
@@ -387,6 +389,24 @@ bool AICore::aim(bool is_last)
 			ang_mod = (last_ang_mod + (SIGN(last_ang_mod) * ang_mod)) / 2;
 			pow_mod = (last_pow_mod + pow_mod) / 2 * SIGN(best_overshoot);
 		}
+
+
+		// Otherwise, if half of the attempts are used up, and there hasn't
+		// been any usable setup, yet, consider to move the tank.
+		// (But only if the first half of opponents have been tried already!)
+		else if ( canMove // No failed or finished moving done, yet
+		       && can_move // Half of the oppAttempts are off
+		       && (attempt >= (findRngAttempts / 2)) // Half the aiming, too
+		       && (buried < BURIED_LEVEL) // Not buried
+		       && needSuccess /* nothing achieved, yet */ ) {
+
+			/* Moving the AI tank is easy. Just set the command and wait for the
+			 * main thread to react.
+			 * However, where shall the tank move and what distance?
+			 */
+
+		} // End of possible movement attempt
+
 
 		// The outcome has to be checked:
 		if (canWork && !isStopped) {
@@ -5262,7 +5282,8 @@ void AICore::operator()()
 			// --- 3) Aim the current selection                       ---
 			// ----------------------------------------------------------
 			if (done && needAim && !isBlocked)
-				done = aim( (tgt_attempts == findTgtAttempts) && needSuccess );
+				done = aim((tgt_attempts == findTgtAttempts) && needSuccess, // is last?
+				           opp_attempts >= (findOppAttempts / 2) );          // allowed to move?
 			else  if (!needAim || isBlocked) {
 				DEBUG_LOG_AIM(player->getName(), "No aiming done: %s, %s",
 				              needAim   ? "Aiming needed"   : "Aiming NOT needed",

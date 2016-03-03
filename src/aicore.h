@@ -474,9 +474,10 @@ struct sWeapListEntry;
   *
   *     3.8  Eventually return the value of 'result'.
   *
-  *   4  done = calcAim(bool is_last) - called if calcAttack() returned true, needAim is true and isBlocked is false.
+  *   4  done = aim(bool is_last, bool can_move) - called if calcAttack() returned true, needAim is true and isBlocked is false.
   *
   *        Param 1 : True if tgt_attempts equals findTgtAttempts and needSuccess is still true.
+  *        Param 2 : True if opp_attempts is at least halve of findOppAttempts.
   *
   *      Here the aiming is done for the selected weapon against the selected target.
   *
@@ -545,6 +546,8 @@ struct sWeapListEntry;
   *            best_power     = curr_power
   *            best_prime_hit = curr_prime_hit
   *            best_score     = hit_score
+  *
+  *          Otherwise the AI might decide to move the tank into a better position.
   *
   *     4.5  Basically there are four different situations that need different actions.
   *          If the shot, or some of the spread or cluster shots, did not finish, it must be tried to change the used
@@ -813,7 +816,7 @@ private:
 	 * -----------------------
 	 */
 
-	bool        aim            (bool is_last);
+	bool        aim            (bool is_last, bool can_move);
 	bool        calcAttack     (int32_t attempt);
 	bool        calcBoxed      (bool is_last);
 	void        calcHitDamage  (int32_t hit_x, int32_t hit_y, double weap_rad,
