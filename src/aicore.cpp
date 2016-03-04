@@ -5193,7 +5193,7 @@ bool AICore::moveTank()
 		while (op) {
 			if (  op->entry->opponent->tank
 			  && !op->entry->opponent->tank->destroy )
-				op->distance = ABSDISTANCE2(x, y, op->opX, op->opY);
+				op->distance = FABSDISTANCE2(x, y, op->opX, op->opY);
 			op = op->next;
 		}
 	}
