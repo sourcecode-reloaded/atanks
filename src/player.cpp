@@ -526,6 +526,21 @@ eControl PLAYER::computerControls (AICore* aicore, bool allow_fire)
 		}
 	} // End of handling firing stage
 
+	// If the AI wants to move their tank, do so:
+	else if (PS_MOVE_LEFT == plStage) {
+		if (tank->moveTank(DIR_LEFT)) {
+			aicore->hasMoved(DIR_LEFT);
+			return CONTROL_OTHER;
+		} else
+			aicore->hasMoved(0); // No movement possible
+	} else if (PS_MOVE_RIGHT == plStage) {
+		if (tank->moveTank(DIR_RIGHT)) {
+			aicore->hasMoved(DIR_RIGHT);
+			return CONTROL_OTHER;
+		} else
+			aicore->hasMoved(0); // No movement possible
+	}
+
 	return CONTROL_NONE;
 }
 

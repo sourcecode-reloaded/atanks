@@ -390,22 +390,19 @@ bool AICore::aim(bool is_last, bool can_move)
 			pow_mod = (last_pow_mod + pow_mod) / 2 * SIGN(best_overshoot);
 		}
 
-
-		// Otherwise, if half of the attempts are used up, and there hasn't
-		// been any usable setup, yet, consider to move the tank.
-		// (But only if the first half of opponents have been tried already!)
+		// Otherwise a movement might be in order
 		else if ( canMove // No failed or finished moving done, yet
 		       && can_move // Half of the oppAttempts are off
 		       && (attempt >= (findRngAttempts / 2)) // Half the aiming, too
 		       && (buried < BURIED_LEVEL) // Not buried
-		       && needSuccess /* nothing achieved, yet */ ) {
-
-			/* Moving the AI tank is easy. Just set the command and wait for the
-			 * main thread to react.
-			 * However, where shall the tank move and what distance?
-			 */
-
-		} // End of possible movement attempt
+		       && (!best_prime_hit || (best_score <= 0)) // nothing achieved here
+		       && needSuccess // nothing achieved otherwise so far
+		       && moveTank() /* movement done */ ) {
+			// Reclaim this attempt
+			--attempt;
+			// And continue, we need to retrace the weapon
+			continue;
+		}
 
 
 		// The outcome has to be checked:
@@ -5109,6 +5106,102 @@ void AICore::weapon_fired()
 		plStage = PS_CLEANUP;
 		actionCondition.notify_one();
 	}
+}
+
+
+/** @brief Attempt to move the tank
+  *
+  * @return true if the tank was moved
+**/
+bool AICore::moveTank()
+{
+	/* Moving the AI tank is easy. Just set the command and wait for the
+	 * main thread to react.
+	 * However, where shall the tank move and what distance?
+	 *
+	 * - If the target is very near (under two bitmap widths) then move
+	 *   away.
+	 * Otherwise:
+	 * - If the angle is steep (75° and up), assume the shot must go
+	 *   over a hill and move away from the target.
+	 * - If the angle is flat  (15° and down), move towards the target,
+	 *   the way seems clear at least.
+	 * Otherwise:
+	 * - If the overshoot is negative (too short), move towards the target.
+	 * - If the overshoot is positive (too far), move away from the target.
+	 */
+	double min_dist   = tank->getDiameter()
+					  + mem_curr->entry->opponent->tank->getDiameter();
+	int32_t want_dist = 0; // Eventually move in this direction ...
+	int32_t want_dir  = 0; // ... by this amount
+
+	if (mem_curr->distance < min_dist) {
+		// The first case: we are too near and want to move away
+		want_dir  = mem_curr->opX > x ? DIR_LEFT : DIR_RIGHT;
+		want_dist = want_dir
+				  * (min_dist - mem_curr->distance + RAND_AI_1P);
+	} else if ( (curr_angle <= 195) && (curr_angle >= 165) ) {
+		// The second case, the angle is steep
+		want_dir  = mem_curr->opX > x ? DIR_LEFT : DIR_RIGHT;
+		want_dist = want_dir
+				  * ( 20 - std::abs(180 - curr_angle) + RAND_AI_1P);
+	} else if ( (curr_angle <= 105) || (curr_angle >= 255) ) {
+		// The third case, the angle is very flat
+		want_dir  = mem_curr->opX > x ? DIR_RIGHT : DIR_LEFT;
+		want_dist = want_dir
+				  * ( std::abs(curr_angle - 180) - 70 + RAND_AI_1P);
+	} else {
+		// Last two cases use the overshoot as a distance to use
+		want_dist = best_overshoot != MAX_OVERSHOOT
+				  ? best_overshoot : curr_overshoot;
+		want_dir  = SIGN(want_dist);
+		// "tune" the distance
+		want_dist += RAND_AI_1P * want_dir;
+	}
+
+	// Now that direction and distance are set up, go for it.
+	bool tank_was_moved = false;
+
+	DEBUG_LOG_AIM(player->getName(), "Starting to move %s for %d",
+	              DIR_LEFT == want_dir ? "left" : "right", want_dist)
+
+	while (!isStopped && canMove && want_dist) {
+
+		isMovedBy = 0;
+		plStage   = DIR_LEFT == want_dir ? PS_MOVE_LEFT : PS_MOVE_RIGHT;
+
+		// Wait for the move to happen
+		while (!isStopped && canMove && (0 == isMovedBy))
+			std::this_thread::yield();
+
+		// Do not do double moves!
+		plStage = PS_AIM;
+
+		if (!tank_was_moved && isMovedBy)
+			tank_was_moved = true;
+
+		want_dist -= isMovedBy;
+	} // That's it, really!
+
+	// No matter how much movement was done, this tank
+	// won't move again in this turn.
+	canMove = false;
+
+	// However, if the tank was moved, all distances are different now:
+	if (tank_was_moved) {
+		opEntry_t* op = mem_head;
+		while (op) {
+			if (  op->entry->opponent->tank
+			  && !op->entry->opponent->tank->destroy )
+				op->distance = ABSDISTANCE2(x, y, op->opX, op->opY);
+			op = op->next;
+		}
+	}
+
+	DEBUG_LOG_AIM(player->getName(), "Moving finished %s (%d distance left)",
+	              want_dist ? "incompletely" : "successfully", want_dist)
+
+	return tank_was_moved;
 }
 
 
