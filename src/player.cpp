@@ -1504,7 +1504,7 @@ void PLAYER::generatePreferences()
 					worth = baseProb / 15. * ai_rate;
 					break;
 				case ITEM_FUEL:
-					worth     = -5000; // Bots don't need fuel
+					worth = baseProb / 30. * ai_rate;
 					isWarhead = true;  // Yes, it's a lie. ;-)
 					break;
 				case ITEM_ROCKET:
@@ -2148,6 +2148,12 @@ bool PLAYER::load_from_file (FILE *file)
   * <ul>
   * <li>Version 65 : THEFT_BOMB
   * </ul>
+  *
+  * Version changes from earlier versions:
+  * <ul>
+  * <li>Version 65 : FUEL needs preferences
+  * </ul>
+  *
 **/
 void PLAYER::load_game_data(FILE* file, int32_t file_version)
 {
@@ -2263,6 +2269,21 @@ void PLAYER::load_game_data(FILE* file, int32_t file_version)
 						}
 						++prf_idx; // Skip new index value
 					} // End of version 65 THEFT_BOMB
+
+					/* === Version Checks for changed weapons / items === */
+
+					if ( (file_version < 65) ) {
+						if ( (ITEM_FUEL == prf_idx) && (prf_val < 1) ) {
+							// Generate a value
+							prf_val = static_cast<double>(MAX_WEAP_PROBABILITY)
+							        / 60.
+							        * ( static_cast<double>(type) / 2. + .5);
+
+							DEBUG_LOG_EMO(name, "Changed preference for %s : %5d",
+							              weapon[ITEM_FUEL].getName(),
+							              prf_val)
+						}
+					} // End of version 65 ITEM_FUEL
 
 					/* === Store data === */
 					// (If someone edited the save game, the index might
