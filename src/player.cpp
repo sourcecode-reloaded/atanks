@@ -561,7 +561,8 @@ int32_t PLAYER::computerSelectPreBuyItem (int32_t max_boost)
 	 * 4.: Armour/Amps
 	 * 5.: "Tools" to free themselves like Riot Blasts
 	 * 6.: Shields, if enough money is there
-	 * 7.: if all is set, look for dimpled/slick projectiles!
+	 * 7.: Fuel, everybody shall have at least 100 units.
+	 * 8.: if all is set, look for dimpled/slick projectiles!
 	 */
 
 
@@ -794,7 +795,15 @@ int32_t PLAYER::computerSelectPreBuyItem (int32_t max_boost)
 	} // End of step 5
 
 
-    // Step 7: Slick / Dimpled Projectiles
+	// Step 7: Fuel
+	if ( (ni[ITEM_FUEL] < 100)
+	  && (money >= item[ITEM_FUEL].cost) ) {
+		DEBUG_LOG_FIN(name, "Pre-selecting Fuel", 0)
+		return (WEAPONS + ITEM_FUEL);
+	}
+
+
+    // Step 8: Slick / Dimpled Projectiles
     if ( (ni[ITEM_SLICKP] + ni[ITEM_DIMPLEP]) < 100 ) {
 
 		if ( (ni[ITEM_DIMPLEP] < 50)
