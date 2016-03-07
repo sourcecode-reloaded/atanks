@@ -2282,14 +2282,15 @@ void PLAYER::load_game_data(FILE* file, int32_t file_version)
 					/* === Version Checks for changed weapons / items === */
 
 					if ( (file_version < 65) ) {
-						if ( (ITEM_FUEL == prf_idx) && (prf_val < 1) ) {
+						if ( (ITEM_FUEL == (prf_idx - WEAPONS))
+						  && (prf_val < 1) ) {
 							// Generate a value
 							prf_val = static_cast<double>(MAX_WEAP_PROBABILITY)
 							        / 60.
 							        * ( static_cast<double>(type) / 2. + .5);
 
 							DEBUG_LOG_EMO(name, "Changed preference for %s : %5d",
-							              weapon[ITEM_FUEL].getName(),
+							              item[ITEM_FUEL].getName(),
 							              prf_val)
 						}
 					} // End of version 65 ITEM_FUEL
