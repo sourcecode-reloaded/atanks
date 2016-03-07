@@ -871,7 +871,7 @@ private:
 	// Internal values
 	mutex_t    actionMutex;
 	condv_t    actionCondition;
-	bool       canMove          = true;
+	abool_t    canMove;
 	volatile
 	bool       canWork          = true;
 	int32_t    curr_angle       = 90;    //!< The angle that is currently tested
@@ -887,7 +887,7 @@ private:
 	bool       isBlocked        = false; //!< Set to true if a shot can't get through
 	volatile
 	bool       isFinished       = false; //!< Set to true when operator() ends
-	int32_t    isMovedBy        = 0;
+	ai32_t     isMovedBy;
 	bool       isShocked        = false;
 	volatile
 	bool       isStopped        = false;

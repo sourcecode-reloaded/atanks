@@ -175,6 +175,8 @@ template<typename T> void sort_entries(T** head)
 
 /// @brief AICore default constructor
 AICore::AICore() :
+	canMove(ATOMIC_VAR_INIT(true)),
+	isMovedBy(ATOMIC_VAR_INIT(0)),
 	textAllowed(ATOMIC_VAR_INIT(true))
 {
 	// As the opponent counts, and both weapons and items
@@ -2866,11 +2868,11 @@ bool AICore::hasExited() const
 void AICore::hasMoved(int32_t direction)
 {
 	if (direction) {
-		isMovedBy = direction;
-		canMove   = true;
+		isMovedBy.store(direction, ATOMIC_WRITE);
+		canMove.store(true, ATOMIC_WRITE);
 	} else {
-		isMovedBy = 0;
-		canMove   = false;
+		isMovedBy.store(0, ATOMIC_WRITE);
+		canMove.store(false, ATOMIC_WRITE);
 	}
 
 }
@@ -2897,8 +2899,8 @@ bool AICore::initialize()
 	blast_med     = 0.;
 	blast_big     = 0.;
 	blast_max     = 0.;
-	canMove       = true;
-	isMovedBy     = 0;
+	canMove.store(true, ATOMIC_WRITE);
+	isMovedBy.store(0, ATOMIC_WRITE);
 	isShocked     = false;
 	revengee      = nullptr;
 	shocker       = nullptr;
@@ -5165,27 +5167,29 @@ bool AICore::moveTank()
 	DEBUG_LOG_AIM(player->getName(), "Starting to move %s for %d",
 	              DIR_LEFT == want_dir ? "left" : "right", want_dist)
 
-	while (!isStopped && canMove && want_dist) {
+	while (!isStopped && canMove.load(ATOMIC_READ) && want_dist) {
 
-		isMovedBy = 0;
+		isMovedBy.store(0, ATOMIC_WRITE);
 		plStage   = DIR_LEFT == want_dir ? PS_MOVE_LEFT : PS_MOVE_RIGHT;
 
 		// Wait for the move to happen
-		while (!isStopped && canMove && (0 == isMovedBy))
+		while ( !isStopped
+		     && canMove.load(ATOMIC_READ)
+		     && (0 == isMovedBy.load(ATOMIC_READ)))
 			std::this_thread::yield();
 
 		// Do not do double moves!
 		plStage = PS_AIM;
 
-		if (!tank_was_moved && isMovedBy)
+		if (!tank_was_moved && isMovedBy.load(ATOMIC_READ))
 			tank_was_moved = true;
 
-		want_dist -= isMovedBy;
+		want_dist -= isMovedBy.load(ATOMIC_READ);
 	} // That's it, really!
 
 	// No matter how much movement was done, this tank
 	// won't move again in this turn.
-	canMove = false;
+	canMove.store(false, ATOMIC_WRITE);
 
 	// However, if the tank was moved, all distances are different now:
 	if (tank_was_moved) {
