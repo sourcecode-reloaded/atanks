@@ -611,7 +611,6 @@ void MISSILE::Check_SDI()
 	// and anything with submunition.
 	if ( (PT_DIGGING == physType)
 	  || (weapType == NAPALM_JELLY)
-	  || ( (weapType >= DIRT_BALL) && (weapType <= SMALL_DIRT_SPREAD) )
 	  || (weap->submunition > 0) )
 		return;
 
@@ -1203,7 +1202,9 @@ void MISSILE::triggerTest ()
 		else
 			trigger();
 	} else if ( (yv > 0.)
-	         && ( (weapType < RIOT_BOMB) || (weapType > SMALL_DIRT_SPREAD) ) )
+	         && ( (weapType < RIOT_BOMB)
+	           || (weapType > SMALL_DIRT_SPREAD) )
+	         && (weapType < BALLISTICS) )
 		// Otherwise it is time to check whether any tank SDI shoots it down
 		Check_SDI();
 }
