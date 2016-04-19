@@ -386,11 +386,23 @@ void EXPLOSION::draw()
 					  && (weapType >= DIRT_BALL)
 					  && (weapType <= SMALL_DIRT_SPREAD) ) {
 						BITMAP* tmp    = create_bitmap(rad * 2, rad * 2); // for mixing
-						int32_t   colour = player ? player->color : GREEN;
-
+						int32_t colour = player ? player->color : GREEN;
 						clear_to_color(tmp, PINK);
 
-						circlefill(tmp, rad, rad, rad - 1, colour);
+						if (global.skippingComputerPlay)
+							circlefill(tmp, rad, rad, rad - 1, colour);
+						else {
+							float fR   = static_cast<float>(getr(colour));
+							float fG   = static_cast<float>(getg(colour));
+							float fB   = static_cast<float>(getb(colour));
+							float fRad = static_cast<float>(rad);
+							for (float r = fRad - 1.f; r > .998f; r -= 1.f)
+								circlefill(tmp, rad, rad, static_cast<int32_t>(r), makecol(
+									static_cast<int32_t>(fR * r / fRad),
+									static_cast<int32_t>(fG * r / fRad),
+									static_cast<int32_t>(fB * r / fRad)
+								));
+						}
 
 						// copy terrain over explosion
 						masked_blit(global.terrain, tmp,
