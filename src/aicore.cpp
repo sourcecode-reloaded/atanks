@@ -5193,6 +5193,12 @@ bool AICore::moveTank()
 
 	// However, if the tank was moved, all distances are different now:
 	if (tank_was_moved) {
+
+		// Update current position
+		x = tank->x;
+		y = tank->y;
+
+		// Update all distances
 		opEntry_t* op = mem_head;
 		while (op) {
 			if (  op->entry->opponent->tank
