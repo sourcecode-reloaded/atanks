@@ -398,9 +398,9 @@ void EXPLOSION::draw()
 							float fRad = static_cast<float>(rad);
 							for (float r = fRad - 1.f; r > .998f; r -= 1.f)
 								circlefill(tmp, rad, rad, static_cast<int32_t>(r), makecol(
-									static_cast<int32_t>(fR * r / fRad),
-									static_cast<int32_t>(fG * r / fRad),
-									static_cast<int32_t>(fB * r / fRad)
+									static_cast<int32_t>(fR * (r / fRad) ),
+									static_cast<int32_t>(fG * (r / fRad) ),
+									static_cast<int32_t>(fB * (r / fRad) )
 								));
 						}
 
