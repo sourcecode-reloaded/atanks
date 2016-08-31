@@ -1,59 +1,33 @@
-There is now some small attempt at prioritisation in this file, 
-higher priority stuff should be at the top of the file, 
-lower priority at the bottom. It is currently only vaguely correct.
+There is now some small attempt at prioritisation in this file, higher priority
+stuff should be at the top of the file, lower priority at the bottom.
 
 	Bugs:
-	- Player options can become scrambled
-          if accessed too often.
-	- Wrap around ceiling should not destroy projectile.
-	- Make sure network client doesn't get
-          unlimited shots.
-	- Atanks crashes when Windows players click the Network option
-          in the main Options menu.
-	- When cycling through tanks on Players screen,
-	  the old tank does not get erased.
-	- AI controlled tanks buy a limited number of defensive
-          upgrades during very long games. Plating, for example.
-
-In player.cpp the PLAYER::computerSelectItem selects a weapon or item for the bot to use.
-Values less than WEAPONS are weapons and values from WEAPONS to THINGS are items.
-After lots of black magic to select a weapon or item, finally in line 3567 the current_weapon containing a value from 0 to THINGS is passed to PLAYER::computerSelectTarget, which in line 3189 uses it as index into the array weapon which only has size WEAPONS, resulting in a segfault.
-Line 3561 also calls PLAYER::computerSelectTarget with a value from 0 to THINGS, so probably the same can happen there.
-I don't know how to fix this, since I don't know how PLAYER::computerSelectTarget should behave when an item is passed instead of a weapon, but probaly some of you know this and can fix.
-
+	- Make sure network client doesn't get unlimited shots.
 
 	Features:
 	- Add scroll bar to buying screen.
-	- Add randomize button to buying screen to have
-	  items automatically purchased.
-
-   	- Field repair kit: Spend a turn to repair your tank 
-          rather than fire.           
-          Limited uses, heals more than Auto Repair Kit 
-	- Radar resistant missile: A missile designed to 
-          avoid the missile defence system by masking 
-          its heat signature 
+	- Add randomize button to buying screen to have items automatically
+	  purchased.
+	- Field repair kit: Spend a turn to repair your tank rather than fire.
+          Limited uses, heals more than Auto Repair Kit.
+	- Radar resistant missile: A missile designed to avoid the missile defence
+	      system by masking its heat signature.
           Yield: Large missile
-	- Better AI against tanks with SDI.
 	- Update client ground surface more often.
-	- When switching languages, player menu should display correct text.
 	- Client needs a buying screen.
-	- Make tank size variable.
 	- Add rocks as semi-destructable items.
-        - First aid kit that you can shoot to a friendly tank.
-
 
 
 ===============================================
 
 	   Items from here to the bottom of the file
 	   are under consideration by the development
-	   team and may (or may not) be implemented.   
+	   team and may (or may not) be implemented.
 
 ===============================================
 
 
-        -- under ground mines
+	-- under ground mines
 
 	-- rocket like fireworks
 
@@ -61,8 +35,11 @@ I don't know how to fix this, since I don't know how PLAYER::computerSelectTarge
 
 	-- Make main window scalable
            (Needs to wait until Allegro 5.x)
+           -> Allegro 5 is a no-opt. And porting to SFML-2 or SDL2 would be
+              a major rewrite of the game. But maybe one day.
 
 	-- Harder ground
+           -> What is that supposed to mean?
 
 	-- High voltage missiles (discharge on impact or when within range)
 		(Bharat Dhareshwar)
